@@ -1,0 +1,237 @@
+images {
+  image: "/assets/images/bullet.png"
+}
+images {
+  image: "/assets/images/ammo.png"
+}
+images {
+  image: "/assets/images/spawnpoint.png"
+}
+images {
+  image: "/assets/images/weapon.png"
+}
+images {
+  image: "/assets/images/shell.png"
+}
+images {
+  image: "/assets/images/flaming_bullet.png"
+}
+images {
+  image: "/assets/images/medikit.png"
+}
+images {
+  image: "/assets/images/rocket.png"
+}
+images {
+  image: "/assets/images/explosion1.png"
+}
+images {
+  image: "/assets/images/explosion2.png"
+}
+images {
+  image: "/assets/images/explosion3.png"
+}
+images {
+  image: "/assets/images/explosion4.png"
+}
+images {
+  image: "/assets/images/explosion5.png"
+}
+images {
+  image: "/assets/images/explosion6.png"
+}
+images {
+  image: "/assets/images/explosion7.png"
+}
+images {
+  image: "/assets/images/laser.png"
+}
+images {
+  image: "/assets/images/crosshair.png"
+}
+images {
+  image: "/assets/images/barrel.png"
+}
+images {
+  image: "/assets/images/swing.png"
+}
+images {
+  image: "/assets/images/sword.png"
+}
+animations {
+  id: "explosion_large"
+  images {
+    image: "/assets/images/explosion1.png"
+  }
+  images {
+    image: "/assets/images/explosion2.png"
+  }
+  images {
+    image: "/assets/images/explosion3.png"
+  }
+  images {
+    image: "/assets/images/explosion4.png"
+  }
+  images {
+    image: "/assets/images/explosion5.png"
+  }
+  images {
+    image: "/assets/images/explosion6.png"
+  }
+  images {
+    image: "/assets/images/explosion7.png"
+  }
+  playback: PLAYBACK_ONCE_PINGPONG
+  fps: 45
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player_run"
+  images {
+    image: "/assets/images/player_run1.png"
+  }
+  images {
+    image: "/assets/images/player_run2.png"
+  }
+  images {
+    image: "/assets/images/player_run3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player_jump"
+  images {
+    image: "/assets/images/player_jump1.png"
+  }
+  images {
+    image: "/assets/images/player_jump2.png"
+  }
+  images {
+    image: "/assets/images/player_jump3.png"
+  }
+  playback: PLAYBACK_LOOP_PINGPONG
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "player_idle"
+  images {
+    image: "/assets/images/player_idle1.png"
+  }
+  images {
+    image: "/assets/images/player_idle2.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "blob_move"
+  images {
+    image: "/assets/images/blob_move1.png"
+  }
+  images {
+    image: "/assets/images/blob_move2.png"
+  }
+  images {
+    image: "/assets/images/blob_move1.png"
+  }
+  images {
+    image: "/assets/images/blob_move3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "skulle_move"
+  images {
+    image: "/assets/images/skull_run1.png"
+  }
+  images {
+    image: "/assets/images/skull_run2.png"
+  }
+  images {
+    image: "/assets/images/skull_run1.png"
+  }
+  images {
+    image: "/assets/images/skull_run3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "smallblob_move"
+  images {
+    image: "/assets/images/smallblob_move1.png"
+  }
+  images {
+    image: "/assets/images/smallblob_move2.png"
+  }
+  images {
+    image: "/assets/images/smallblob_move1.png"
+  }
+  images {
+    image: "/assets/images/smallblob_move3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "explosion_small"
+  images {
+    image: "/assets/images/explosion1.png"
+  }
+  images {
+    image: "/assets/images/explosion2.png"
+  }
+  playback: PLAYBACK_ONCE_PINGPONG
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "flame"
+  images {
+    image: "/assets/images/flame1.png"
+  }
+  images {
+    image: "/assets/images/flame1.png"
+  }
+  images {
+    image: "/assets/images/flame2.png"
+  }
+  images {
+    image: "/assets/images/flame2.png"
+  }
+  images {
+    image: "/assets/images/flame3.png"
+  }
+  images {
+    image: "/assets/images/flame4.png"
+  }
+  images {
+    image: "/assets/images/flame5.png"
+  }
+  images {
+    image: "/assets/images/flame6.png"
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 15
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

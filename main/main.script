@@ -1,0 +1,352 @@
+local CAMERA_ID = hash("/cameraGame")
+local H_TOUCH = hash("touch")
+local PATH_MOB_1 = "mob1/root"
+local PATH_MOB_2 = "mob2/root"
+
+URL_MAIN = "main:/main#main"
+
+CELL_SIZE	= 16
+WORLD_W		= 30
+WORLD_H		= 30
+SPEED		= 10
+
+STATE_HERO_1	= 1
+STATE_HERO_2	= 2
+STATE_EDITOR_1	= 3
+STATE_EDITOR_2	= 4
+
+TILE_WALL	= 7
+TILE_GRASS	= 51
+
+camera = require('orthographic.camera')
+global = {}
+
+local function init_points(self)
+	local tile, num = 0
+	
+	for i = 1, WORLD_W do
+		for j = 1, WORLD_H do
+			tile = tilemap.get_tile("/level#map", "points", i, j)
+
+			if (tile > 0) then
+				-- print(i, j, tile)
+				table.insert(self.list_points, vmath.vector3(i, j, 0))
+			end
+
+		end
+	end
+	
+end
+
+local function update_world(self)
+	local tile, num = 0
+
+	for i = 1, WORLD_W do
+		for j = 1, WORLD_H do
+			tile = tilemap.get_tile("/level#map", "walls", i, j)
+
+			num = i + ((j-1) * WORLD_W)
+			self.world[num] = 0
+
+			-- if (tile > 0) then
+			-- 	print(num, i, j, tile)
+			-- end
+			
+			if (tile == TILE_WALL) then
+				self.world[num] = 1
+			elseif (tile == TILE_GRASS) then
+				self.world[num] = 2
+			end
+
+		end
+	end
+
+	astar.set_map(self.world)
+	
+end
+
+local function init_path(self)
+	local world	= self.world
+	local map_width = WORLD_W
+	local map_height = WORLD_H
+
+	local costs1 = {
+		[0] = {
+			1.0, -- E
+			1.0, -- N
+			1.0, -- W
+			1.0, -- S
+			1.41, -- NE
+			1.41, -- NW
+			1.41, -- SW
+			1.41 -- SE
+		}
+	}
+
+	local costs2 = {
+		[0] = {
+			1.0, -- E
+			1.0, -- N
+			1.0, -- W
+			1.0, -- S
+			1.41, -- NE
+			1.41, -- NW
+			1.41, -- SW
+			1.41 -- SE
+		},
+		[2] = {
+			1.0, -- E
+			1.0, -- N
+			1.0, -- W
+			1.0, -- S
+			1.41, -- NE
+			1.41, -- NW
+			1.41, -- SW
+			1.41 -- SE
+		}
+	}
+
+	local direction = astar.DIRECTION_EIGHT
+	local allocate = map_width * map_height
+	local typical_adjacent = 8
+	local cache = true
+
+	cache = false
+
+	astar.setup(map_width, map_height, direction, allocate, typical_adjacent, cache)
+	astar.set_costs(costs1)
+
+	self.costs1 = costs1
+	self.costs2 = costs2
+
+	update_world(self)
+	
+end
+
+function find_path(startPos, endPos)
+	local result, size, total_cost, path = astar.solve(startPos.x, startPos.y, endPos.x, endPos.y)
+
+	if result == astar.SOLVED then
+		-- print("SOLVED")
+		-- for i, v in ipairs(path) do
+		-- 	print("path: ", v.x .. "-" .. v.y)
+		-- end
+
+		return path
+	elseif result == astar.NO_SOLUTION then
+		-- print("NO_SOLUTION")
+	elseif result == astar.START_END_SAME then
+		-- print("START_END_SAME")
+	end
+
+
+end
+
+local function update_tile(self, tile_pos, tile_type)
+	local tile = tilemap.get_tile("/level#map", "walls", tile_pos.x, tile_pos.y)
+
+	local new_tile = TILE_WALL
+	
+	if (tile_type == 2) then
+		new_tile = TILE_GRASS
+	end
+	
+	if (tile > 0) then
+		tilemap.set_tile("/level#map", "walls", tile_pos.x, tile_pos.y, 0)
+	else
+		tilemap.set_tile("/level#map", "walls", tile_pos.x, tile_pos.y, new_tile)
+	end
+	
+end
+
+local function place_hero(self, tile_pos, hero)
+	local pos = vmath.vector3(0, 0, 1)
+	local tile 
+
+	pos.x = self.pos_grid.x + tile_pos.x * CELL_SIZE - CELL_SIZE * 0.5
+	pos.y = self.pos_grid.y + tile_pos.y * CELL_SIZE - CELL_SIZE * 0.5
+
+	if (hero == 1) then
+		go.set_position(pos, PATH_MOB_1)
+	elseif (hero == 2) then
+		go.set_position(pos, PATH_MOB_2)
+	end
+
+	return pos
+end
+
+local function getTileFromPos(self, vPos)
+	local pos =  vmath.vector3(0, 0, 0)
+	
+	vPos.x = vPos.x - self.pos_grid.x
+	vPos.y = vPos.y - self.pos_grid.y
+
+	local tileX = math.floor((vPos.x + CELL_SIZE) / CELL_SIZE)
+	local tileY = math.floor((vPos.y + CELL_SIZE) / CELL_SIZE)
+
+	if (tileX <= 0) or (tileY <= 0) then
+		return nil
+	end
+	if (tileX > WORLD_H) or (tileY > WORLD_H) then
+		return nil
+	end
+	
+	return vmath.vector3(tileX, tileY, 0)
+end
+
+local function move_hero(self, endPos, hero, skip_move)
+	local url_mob = PATH_MOB_1
+
+	if (hero == 1) then
+		url_mob = PATH_MOB_1
+		
+		if self.test_flag then
+			astar.set_costs(self.costs1)
+		end
+	elseif (hero == 2) then
+		url_mob = PATH_MOB_2
+		
+		if self.test_flag then
+			astar.set_costs(self.costs2)
+		end
+	end
+	
+	local pos_hero = go.get_position(url_mob)
+	local startPos = getTileFromPos(self, pos_hero)
+
+	endPos.x = endPos.x - 1
+	endPos.y = endPos.y - 1
+
+	startPos.x = startPos.x - 1
+	startPos.y = startPos.y - 1
+	
+	local path = find_path(startPos, endPos)
+
+	if path and (not skip_move) then
+		msg.post(url_mob, "follow_path", {data = path})
+	end
+
+end
+
+local function test1(self)
+	local iterations = 100000
+
+	local t = socket.gettime()
+
+	for i=1,iterations do
+		local r = math.random(1,#self.list_points)
+		local tile_pos = self.list_points[r]
+		move_hero(self, tile_pos, 1, true)
+
+		local r = math.random(1,#self.list_points)
+		local tile_pos = self.list_points[r]
+		move_hero(self, tile_pos, 2, true)
+	end
+
+	print("prefomance test took ", (socket.gettime() - t))
+
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+
+	math.randomseed(100000 * (socket.gettime() % 1))
+	math.random()
+	math.random()
+	math.random()
+	
+	msg.post(CAMERA_ID, "enable")
+	msg.post(CAMERA_ID, "use_projection", { projection = hash("FIXED_AUTO") })
+
+	self.pos_grid = go.get_position("level")
+	global.pos_grid = self.pos_grid
+
+	self.control = STATE_HERO_1
+	self.test_flag = false
+
+	self.world = {}
+	self.list_points = {}
+
+	init_points(self)
+	
+	init_path(self)
+
+	place_hero(self, vmath.vector3(2, 2, 0), 1)
+	place_hero(self, vmath.vector3(3, 2, 0), 2)
+
+	msg.post(PATH_MOB_2, "update_skin", {skin = "skulle_move"})
+	
+end
+
+function final(self)
+	msg.post(CAMERA_ID, "disable")
+	
+end
+
+function update(self, dt)
+
+end
+
+function fixed_update(self, dt)
+
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("control_hero") then
+		if (message.value == 1) then
+			self.control = STATE_HERO_1
+		end
+		if (message.value == 2) then
+			self.control = STATE_HERO_2
+		end
+		update_world(self)
+		
+	elseif message_id == hash("control_editor") then
+		if (message.value == 1) then
+			self.control = STATE_EDITOR_1
+		end
+		if (message.value == 2) then
+			self.control = STATE_EDITOR_2
+		end
+		
+	elseif message_id == hash("test") then
+		if (message.value == 1) then
+			test1(self)
+		end
+		if (message.value == 2) then
+			self.test_flag = not self.test_flag
+			print('set cost for a/b hero', self.test_flag)
+		end
+
+	end
+	
+end
+
+function on_input(self, action_id, action)
+	if action_id == H_TOUCH then
+		if action.released then
+			local cursor_pos = camera.screen_to_world(CAMERA_ID, vmath.vector3(action.x, action.y, 0))
+			
+			local tile_pos = getTileFromPos(self, cursor_pos)
+			
+			if tile_pos then
+				-- print('tile_pos')
+				-- pprint(tile_pos)
+
+				if (self.control == STATE_HERO_1) then
+					move_hero(self, tile_pos, 1)
+
+				elseif (self.control == STATE_HERO_2) then
+					move_hero(self, tile_pos, 2)
+					
+				elseif (self.control == STATE_EDITOR_1) then
+					update_tile(self, tile_pos, 1)
+
+				elseif (self.control == STATE_EDITOR_2) then
+					update_tile(self, tile_pos, 2)
+					
+				end
+			end
+		end
+	end
+end

@@ -1,0 +1,20 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /orthographic/render/orthographic.renderc
+
+[script]
+shared_state = 1
+
+[display]
+width = 600
+height = 900
+
+[android]
+input_method = HiddenInputField
+
+[project]
+title = test astar
+dependencies#0 = https://github.com/selimanac/defold-astar/archive/v1.0.1.zip
+dependencies#1 = https://github.com/andsve/dirtylarry/archive/master.zip
+dependencies#2 = https://github.com/britzl/defold-orthographic/archive/3.3.1.zip
+

@@ -1,0 +1,77 @@
+
+local PATH_ROOT = "root"
+local PATH_MOB = "mob"
+local PATH_MOB_SPRITE = "mob#sprite"
+
+local function update_way_points(self, path)
+	self.wayPoints = path
+	self.isFollowPath = true
+	self.wayIndex = 1
+	self.maxIndex = #path
+	self.count = 0
+	self.last_pos = vmath.vector3(0, 0, 1)
+
+end
+
+local function move_way_point(self)
+	if self.wayIndex == self.maxIndex then
+		self.isFollowPath = false
+		self.wayPoints = nil
+		-- print('finish movement')
+	else
+		self.wayIndex = self.wayIndex + 1
+		self.nextPoint = self.wayPoints[self.wayIndex]
+
+		local pos = vmath.vector3(0, 0, 1)
+		pos.x = global.pos_grid.x + self.nextPoint.x * CELL_SIZE + CELL_SIZE * 0.5
+		pos.y = global.pos_grid.y + self.nextPoint.y * CELL_SIZE + CELL_SIZE * 0.5
+
+		if (self.last_pos.x < pos.x) then
+			go.set_rotation(vmath.quat_rotation_y(math.rad(180)), PATH_MOB)
+		elseif (self.last_pos.x > pos.x) then
+			go.set_rotation(vmath.quat_rotation_y(math.rad(0)), PATH_MOB)
+		end
+
+		go.set_position(pos, PATH_ROOT)
+
+		self.last_pos.x = pos.x
+		self.last_pos.y = pos.y
+	end
+	
+end
+
+function init(self)
+	self.wayPoints = nil
+	self.isFollowPath = false
+
+end
+
+function final(self)
+
+end
+
+function update(self, dt)
+	if self.isFollowPath and self.wayPoints then
+		self.count = self.count + 1
+
+		if (self.count > SPEED) then
+			move_way_point(self)
+			self.count = 0
+		end
+		
+	end
+	
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("follow_path") then
+		if message.data then
+			update_way_points(self, message.data)
+		end
+
+	elseif message_id == hash("update_skin") then
+		sprite.play_flipbook(PATH_MOB_SPRITE, message.skin)
+		
+	end
+	
+end
